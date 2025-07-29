@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  scrapy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: imdb_scraper
+    volumes:
+      - .:/app
+      - ./output:/app/output
+    working_dir: /app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: >
+      bash -c "
+        while inotifywait -e modify,create,delete -r ./imdb_scraper; do
+          scrapy crawl $SCRAPY_SPIDER_NAME -o $SCRAPY_OUTPUT_FILE -t csv;
+        done
+      "
+
+  db:
+    image: postgres:16
+    container_name: scrapy_postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
