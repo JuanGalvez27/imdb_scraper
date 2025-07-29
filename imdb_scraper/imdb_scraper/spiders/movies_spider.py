@@ -1,7 +1,7 @@
 from imdb_scraper.items import MovieItem
-from scrapy import Request, Spider, http
 from imdb_scraper.loaders import parse_duration
-from scrapy_splash import SplashRequest
+from scrapy import Request, Spider, http
+
 
 class Setting:
 
@@ -45,20 +45,6 @@ class MovieSpider(Spider):
 
     start_urls = [Setting.main_url]
 
-    custom_settings = {
-        "FEED_URI": "movies.csv",
-        "FEED_FORMAT": "csv",
-        "FEED_EXPORT_ENCODING": "utf-8",
-        "FEED_EXPORT_FIELDS": [
-            "title",
-            "release_year",
-            "rating",
-            "duration_minutes",
-            "metascore",
-            "main_actors",
-        ],
-    }
-
 
     def start_requests(self):
         yield Request(Setting.main_url + "/chart/top/")
@@ -82,7 +68,9 @@ class MovieSpider(Spider):
         title = response.xpath(MoviePageObject.title).get(default="")
         release_year = response.xpath(MoviePageObject.release_year).get(default="")
         rating = response.xpath(MoviePageObject.rating).get(default="")
-        duration = parse_duration(response.xpath(MoviePageObject.duration).get(default=""))
+        duration = parse_duration(
+            response.xpath(MoviePageObject.duration).get(default="")
+        )
         metascore = response.xpath(MoviePageObject.metascore).get(default="")
         actors = response.xpath(MoviePageObject.main_actors).getall()[:3]
 

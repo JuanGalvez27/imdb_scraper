@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,6 +11,14 @@ NEWSPIDER_MODULE = "imdb_scraper.spiders"
 
 ADDONS = {}
 
+# Database settings
+DATABASE_USER = os.getenv("POSTGRES_USER", "user")
+DATABASE_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+DATABASE_HOST = os.getenv("DATABASE_HOST", "localhost")
+DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
+DATABASE_NAME = os.getenv("POSTGRES_DB", "imdb_scraper")
+
+DATABASE_URL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = os.getenv("ROBOTSTXT_OBEY", "True")
@@ -27,9 +36,9 @@ DOWNLOAD_DELAY = 2
 
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'en',
-    'User-Agent': os.getenv("USER_AGENT")
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en",
+    "User-Agent": os.getenv("USER_AGENT"),
 }
 
 # Enable or disable spider middlewares
@@ -38,7 +47,7 @@ DEFAULT_REQUEST_HEADERS = {
 #    "imdb_scraper.middlewares.ImdbScraperSpiderMiddleware": 543,
 # }
 SPIDER_MIDDLEWARES = {
-    "scrapy_splash.SplashDeduplicateArgsMiddleware": 100,
+    # "scrapy_splash.SplashDeduplicateArgsMiddleware": 100,
 }
 
 # Enable or disable downloader middlewares
@@ -52,12 +61,12 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 
-
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "imdb_scraper.pipelines.ImdbScraperPipeline": 300,
-# }
+ITEM_PIPELINES = {
+    "imdb_scraper.pipelines.PostgresPipeline": 300,
+    "imdb_scraper.pipelines.UniqueCsvPipeline": 100,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,10 +97,10 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # PROXY_ADDRESS = "50.122.86.118" #, "50.172.150.134", "54.219.186.252")
 
-# RANDOM_UA_PER_PROXY = True 
+# RANDOM_UA_PER_PROXY = True
 
 ROTATING_PROXY_LIST = [
-    "54.219.186.252:80", # ok
+    "54.219.186.252:80",  # ok
     # "93.115.200.159:8001",
     # "93.115.200.158:8002",
     # "93.115.200.157:8003",
@@ -103,3 +112,5 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 
 # SPLASH_URL = "http://localhost:8050"
 # DUPEFILTER_CLASS = "scrapy_splash.SplashAwareDupeFilter"
+
+SCRAPY_OUTPUT_FILE = os.getenv("SCRAPY_OUTPUT_FILE", "output/movies.csv")
